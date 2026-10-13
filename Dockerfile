@@ -5,13 +5,20 @@ ARG GLAB_VERSION=1.123.0
 
 RUN apt-get update \
   && apt-get install -y --no-install-recommends \
-    bash ca-certificates git ripgrep \
+    bash ca-certificates git ripgrep sudo vim \
     curl wget jq zip unzip less procps openssh-client \
     fd-find gh \
     python3 python3-pip python3-venv pipx \
     build-essential \
   && rm -rf /var/lib/apt/lists/* \
   && ln -sf "$(command -v fdfind)" /usr/local/bin/fd
+
+# Passwordless sudo so the runtime user can apt-install things on the fly.
+# The launcher passes an arbitrary host UID, so allow all users; the
+# entrypoint registers a passwd entry for the UID at startup.
+RUN echo 'ALL ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/nopasswd \
+  && chmod 440 /etc/sudoers.d/nopasswd \
+  && visudo -c
 
 # Docker CLI from Docker's apt repo, so it matches a current host daemon.
 RUN curl -fsSL https://download.docker.com/linux/debian/gpg \
