@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # Launch the Pi sandbox in the current directory.
 #
-# Auto-builds the image (a cached no-op when unchanged), mounts $PWD as the
-# workspace, and shares the host ~/.pi/agent (settings, extensions, auth.json,
-# sessions) with the container.
+# Auto-builds the image (a cached no-op when unchanged), mounts $PWD at the
+# same absolute path inside the container, and shares the host ~/.pi/agent
+# (settings, extensions, auth.json, sessions) with the container.
 
 set -euo pipefail
 
@@ -30,9 +30,13 @@ fi
 
 docker build -t pi-sandbox "$repo_dir"
 
+# Mount the project at its real host path (not /workspace) so paths printed
+# on the host and in the container match, then start Pi there.
+cwd=$(pwd -P)
 run_args=(
   --user "$(id -u):$(id -g)"
-  -v "$PWD:/workspace"
+  -v "$cwd:$cwd"
+  -w "$cwd"
   -v "$agent_dir:/home/sbx/.pi/agent"
 )
 

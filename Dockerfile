@@ -57,5 +57,7 @@ RUN npm install -g --ignore-scripts @earendil-works/pi-coding-agent
 RUN mkdir -p /home/sbx/.pi && chmod 777 /home/sbx
 ENV HOME=/home/sbx
 
+# Fallback only; pi-sbx.sh overrides this so the container's working
+# directory matches the mounted host path.
 WORKDIR /workspace
 ENTRYPOINT ["pi"]

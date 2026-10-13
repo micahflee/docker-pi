@@ -21,8 +21,10 @@ From the folder you want Pi to work in:
 pi-sbx
 ```
 
-This builds the image if needed, mounts the current directory at
-`/workspace`, and runs as your host user so files stay owned by you. If a
+This builds the image if needed, mounts the current directory at the same
+absolute path inside the container (so `/home/you/project` on the host is
+`/home/you/project` in the sandbox, not `/workspace`), and runs as your host
+user so files stay owned by you. If a
 Docker socket is present, it is mounted too, so `docker` commands run against
 your host daemon.
 
