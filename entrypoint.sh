@@ -20,4 +20,12 @@ if [ "$(getent shadow user 2>/dev/null | cut -d: -f1)" != "user" ]; then
   echo 'user:*:19750:0:99999:7:::' >> /etc/shadow
 fi
 
+# Snapshot the host gitconfig (staged at .gitconfig-host by the launcher)
+# into ~/.gitconfig. Only copy if absent: git can't write to a single-file
+# bind mount, and re-copying on restart would wipe container-local edits
+# (e.g. glab's credential helper).
+if [ -e "$HOME/.gitconfig-host" ] && [ ! -e "$HOME/.gitconfig" ]; then
+  cp "$HOME/.gitconfig-host" "$HOME/.gitconfig"
+fi
+
 exec "$@"

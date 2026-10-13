@@ -115,7 +115,11 @@ case "${1:-run}" in
       -v "$agent_dir:/home/sbx/.pi/agent"
     )
     if [ -e "$gitconfig" ]; then
-      run_args+=(-v "$gitconfig:/home/sbx/.gitconfig:rw")
+      # Mount to a staging path, not ~/.gitconfig itself: git writes config
+      # files atomically (temp file + rename), which fails with EBUSY on a
+      # single-file bind mount. The entrypoint copies it into ~/.gitconfig
+      # at startup; writes stay container-local.
+      run_args+=(-v "$gitconfig:/home/sbx/.gitconfig-host:ro")
     fi
 
     if [ -e /var/run/docker.sock ]; then
