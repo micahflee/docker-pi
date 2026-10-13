@@ -83,6 +83,9 @@ RUN git clone --depth 1 https://github.com/mattpocock/skills /tmp/skills \
   && rm -rf /tmp/skills
 ENV HOME=/home/sbx
 
+# Also copy via OSC 52 so the host terminal's clipboard gets it.
+ENV PI_CLIPBOARD_OSC52=1
+
 # Fallback only; pi-sbx.sh overrides this so the container's working
 # directory matches the mounted host path.
 WORKDIR /workspace

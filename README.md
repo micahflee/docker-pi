@@ -34,6 +34,13 @@ instead, if that file exists.
 Mounts and the image are fixed at container creation; to pick up Dockerfile
 or host config changes, remove the sandbox and let it be recreated.
 
+## Clipboard
+
+The container can't reach the host clipboard, so the image sets
+`PI_CLIPBOARD_OSC52=1`: copies in pi also emit an OSC 52 escape sequence the
+host terminal applies. Requires an OSC-52-capable terminal (iTerm2, kitty,
+WezTerm, Alacritty, ghostty, foot — not Terminal.app or GNOME Terminal).
+
 ## Commands
 
 - `pi-sbx` — run (or rejoin) the sandbox for the current directory
