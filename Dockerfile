@@ -56,6 +56,13 @@ RUN npm install -g --ignore-scripts @earendil-works/pi-coding-agent
 # The real ~/.pi/agent is bind-mounted here at run time.
 RUN mkdir -p /home/sbx/.pi && chmod 777 /home/sbx
 
+# The launcher passes an arbitrary host UID:GID via docker --user, which has
+# no /etc/passwd entry (bash shows "I have no name!"). The entrypoint adds a
+# matching "user" entry at startup; passwd/group must be writable for that.
+COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh \
+  && chmod 666 /etc/passwd /etc/group
+
 # Bundle the latest grilling/grill-me skills from mattpocock/skills.
 # They go in ~/.agents/skills (which pi auto-discovers) rather than
 # ~/.pi/agent/skills, because the launcher bind-mounts the host's
@@ -72,4 +79,4 @@ ENV HOME=/home/sbx
 # Fallback only; pi-sbx.sh overrides this so the container's working
 # directory matches the mounted host path.
 WORKDIR /workspace
-ENTRYPOINT ["pi"]
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh", "pi"]
