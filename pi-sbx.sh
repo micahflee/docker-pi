@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Launch the Pi sandbox in the current directory. Creates a persistent
 # container per directory (or execs into / restarts the existing one).
-# Subcommands: ls (list sandboxes), rm (delete this directory's sandbox).
+# Subcommands: ls (list sandboxes), shell (open a shell in this directory's sandbox),
+# rm (delete this directory's sandbox).
 
 set -euo pipefail
 
@@ -70,6 +71,18 @@ case "${1:-run}" in
     exit 0
     ;;
 
+  shell)
+    if ! docker container inspect "$name" >/dev/null 2>&1; then
+      echo "pi-sbx: no sandbox for $cwd (run 'pi-sbx' first)" >&2
+      exit 1
+    fi
+    running=$(docker container inspect -f '{{.State.Running}}' "$name")
+    if [ "$running" != "true" ]; then
+      docker start "$name" >/dev/null
+    fi
+    exec docker exec -it "$name" bash
+    ;;
+
   run)
     check_agent_dir
     if docker container inspect "$name" >/dev/null 2>&1; then
@@ -111,7 +124,7 @@ case "${1:-run}" in
     ;;
 
   *)
-    echo "usage: pi-sbx [ls | rm [-y|--force]]" >&2
+    echo "usage: pi-sbx [ls | shell | rm [-y|--force]]" >&2
     exit 2
     ;;
 esac

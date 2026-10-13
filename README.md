@@ -38,6 +38,7 @@ or host config changes, remove the sandbox and let it be recreated.
 
 - `pi-sbx` — run (or rejoin) the sandbox for the current directory
 - `pi-sbx ls` — list all sandboxes (name, state, path)
+- `pi-sbx shell` — open an interactive shell inside this directory's sandbox
 - `pi-sbx rm [-y|--force]` — delete this directory's sandbox (prompts
   unless `-y`; `~/.pi/agent` on the host is untouched, the image is kept)
 
