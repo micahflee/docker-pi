@@ -1,4 +1,4 @@
-# docker-pi
+# pi-sbx
 
 Run the [Pi coding agent](https://pi.dev) in a Docker sandbox, loosely based on
 [the official containerization docs](https://pi.dev/docs/latest/containerization#run-pi-in-plain-docker).
