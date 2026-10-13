@@ -1,19 +1,25 @@
 # docker-pi
 
-Loosely based on [these docs](https://pi.dev/docs/latest/containerization#run-pi-in-plain-docker).
+Run the [Pi coding agent](https://pi.dev) in a Docker sandbox, loosely based on
+[the official containerization docs](https://pi.dev/docs/latest/containerization#run-pi-in-plain-docker).
 
-Build with:
+Your host `~/.pi/agent` is bind-mounted into the container, so the sandbox
+shares your settings, extensions, `/login` credentials, and sessions. Log in
+and install extensions on the host; the sandbox inherits them.
+
+## Install
 
 ```sh
-docker build -t pi-sandbox -f Dockerfile .
+make install
 ```
 
-Start with:
+## Use
+
+From the folder you want Pi to work in:
 
 ```sh
-docker run --rm -it \
-  -e ANTHROPIC_API_KEY \
-  -v "$PWD:/workspace" \
-  -v pi-agent-home:/root/.pi/agent \
-  pi-sandbox
+pi-sbx
 ```
+
+This builds the image if needed, mounts the current directory at
+`/workspace`, and runs as your host user so files stay owned by you.
