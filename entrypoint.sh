@@ -28,4 +28,10 @@ if [ -e "$HOME/.gitconfig-host" ] && [ ! -e "$HOME/.gitconfig" ]; then
   cp "$HOME/.gitconfig-host" "$HOME/.gitconfig"
 fi
 
+# Repos are bind-mounted from the host and owned by the host UID, which
+# differs from the arbitrary UID the launcher passes to docker --user. That
+# trips git's dubious-ownership check; the sandbox only mounts the user's own
+# directories, so trust everything by default.
+git config --global --add safe.directory '*' 2>/dev/null || true
+
 exec "$@"
