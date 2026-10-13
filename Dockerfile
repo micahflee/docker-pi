@@ -68,7 +68,7 @@ RUN mkdir -p /home/sbx/.pi && chmod 777 /home/sbx
 # matching "user" entry at startup; passwd/group must be writable for that.
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh \
-  && chmod 666 /etc/passwd /etc/group
+  && chmod 666 /etc/passwd /etc/group /etc/shadow
 
 # Bundle the latest grilling/grill-me skills from mattpocock/skills.
 # They go in ~/.agents/skills (which pi auto-discovers) rather than

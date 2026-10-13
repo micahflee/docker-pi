@@ -13,5 +13,11 @@ fi
 if ! getent group "$gid" >/dev/null 2>&1; then
   echo "user:x:${gid}:" >> /etc/group
 fi
+# sudo validates the account via /etc/shadow; without an entry there it
+# reports "account validation failure, is your account locked?". A "*"
+# password means "no password login" but the account is not locked.
+if [ "$(getent shadow user 2>/dev/null | cut -d: -f1)" != "user" ]; then
+  echo 'user:*:19750:0:99999:7:::' >> /etc/shadow
+fi
 
 exec "$@"
