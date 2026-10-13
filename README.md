@@ -17,15 +17,29 @@ From the folder you want Pi to work in:
 pi-sbx
 ```
 
-This builds the image if needed, mounts the current directory at the same
-absolute path inside the container, and runs as your host user so files stay
-owned by you. Your host `~/.pi/agent` is bind-mounted in, so the sandbox
+This creates a persistent Docker container for the current directory (named
+by a hash of its path). Run it again from the same folder and it restarts
+(or execs into) the same container, so anything you installed or configured
+inside it sticks around. If the container is already running (another
+terminal), a new pi session is started inside it.
+
+Your host `~/.pi/agent` is bind-mounted in, so the sandbox
 shares your settings, extensions, `/login` credentials, and sessions. If a
 Docker socket is present, it is mounted too, so `docker` commands run against
 your host daemon.
 
 Git config comes from the host's `~/.gitconfig` — or `~/.gitconfig-sbx`
 instead, if that file exists.
+
+Mounts and the image are fixed at container creation; to pick up Dockerfile
+or host config changes, remove the sandbox and let it be recreated.
+
+## Commands
+
+- `pi-sbx` — run (or rejoin) the sandbox for the current directory
+- `pi-sbx ls` — list all sandboxes (name, state, path)
+- `pi-sbx rm [-y|--force]` — delete this directory's sandbox (prompts
+  unless `-y`; `~/.pi/agent` on the host is untouched, the image is kept)
 
 The image ships Node 24 (Pi included), Python 3 with pip, uv, and Poetry,
 build-essential, Go, Rust, git, gh, glab, docker CLI, ripgrep, fd, and common
