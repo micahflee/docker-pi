@@ -30,8 +30,18 @@ fi
 
 docker build -t pi-sandbox "$repo_dir"
 
-exec docker run --rm -it \
-  --user "$(id -u):$(id -g)" \
-  -v "$PWD:/workspace" \
-  -v "$HOME/.pi/agent:/home/sbx/.pi/agent" \
-  pi-sandbox
+run_args=(
+  --user "$(id -u):$(id -g)"
+  -v "$PWD:/workspace"
+  -v "$agent_dir:/home/sbx/.pi/agent"
+)
+
+# Share the host Docker daemon, if there is one.
+if [ -e /var/run/docker.sock ]; then
+  run_args+=(
+    -v /var/run/docker.sock:/var/run/docker.sock
+    --group-add "$(stat -c %g /var/run/docker.sock)"
+  )
+fi
+
+exec docker run --rm -it "${run_args[@]}" pi-sandbox

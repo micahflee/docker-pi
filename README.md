@@ -22,4 +22,10 @@ pi-sbx
 ```
 
 This builds the image if needed, mounts the current directory at
-`/workspace`, and runs as your host user so files stay owned by you.
+`/workspace`, and runs as your host user so files stay owned by you. If a
+Docker socket is present, it is mounted too, so `docker` commands run against
+your host daemon.
+
+The image ships Node 24 (Pi included), Python 3 with pip, uv, and Poetry,
+build-essential, Go, Rust, git, gh, glab, docker CLI, ripgrep, fd, and common
+CLI utilities.
