@@ -115,7 +115,7 @@ case "${1:-run}" in
       -v "$agent_dir:/home/sbx/.pi/agent"
     )
     if [ -e "$gitconfig" ]; then
-      run_args+=(-v "$gitconfig:/home/sbx/.gitconfig:ro")
+      run_args+=(-v "$gitconfig:/home/sbx/.gitconfig:rw")
     fi
 
     if [ -e /var/run/docker.sock ]; then
