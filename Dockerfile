@@ -55,6 +55,18 @@ RUN npm install -g --ignore-scripts @earendil-works/pi-coding-agent
 # Writable HOME for the arbitrary host UID the launcher passes with --user.
 # The real ~/.pi/agent is bind-mounted here at run time.
 RUN mkdir -p /home/sbx/.pi && chmod 777 /home/sbx
+
+# Bundle the latest grilling/grill-me skills from mattpocock/skills.
+# They go in ~/.agents/skills (which pi auto-discovers) rather than
+# ~/.pi/agent/skills, because the launcher bind-mounts the host's
+# ~/.pi/agent over that path at run time.
+RUN git clone --depth 1 https://github.com/mattpocock/skills /tmp/skills \
+  && mkdir -p /home/sbx/.agents/skills \
+  && cp -r /tmp/skills/skills/productivity/grilling \
+          /tmp/skills/skills/productivity/grill-me \
+          /home/sbx/.agents/skills/ \
+  && chmod -R a+rX /home/sbx/.agents/skills \
+  && rm -rf /tmp/skills
 ENV HOME=/home/sbx
 
 # Fallback only; pi-sbx.sh overrides this so the container's working

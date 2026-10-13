@@ -30,3 +30,8 @@ instead, if that file exists.
 The image ships Node 24 (Pi included), Python 3 with pip, uv, and Poetry,
 build-essential, Go, Rust, git, gh, glab, docker CLI, ripgrep, fd, and common
 CLI utilities.
+
+It also bundles the latest [`grilling` and `grill-me`
+skills](https://github.com/mattpocock/skills), pulled from that repo at build
+time into `~/.agents/skills/` (a directory pi auto-discovers, unlike
+`~/.pi/agent`, which the host bind-mount shadows).
