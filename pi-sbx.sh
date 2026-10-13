@@ -30,7 +30,12 @@ check_agent_dir() {
 }
 
 cwd=$(pwd -P)
-name="pi-sbx-$(printf '%s' "$cwd" | sha256sum | cut -c1-12)"
+if command -v sha256sum >/dev/null 2>&1; then
+  name="pi-sbx-$(printf '%s' "$cwd" | sha256sum | cut -c1-12)"
+else
+  # macOS ships `shasum` instead of GNU coreutils `sha256sum`
+  name="pi-sbx-$(printf '%s' "$cwd" | shasum -a 256 | cut -c1-12)"
+fi
 
 case "${1:-run}" in
   ls)
@@ -114,9 +119,15 @@ case "${1:-run}" in
     fi
 
     if [ -e /var/run/docker.sock ]; then
+      # BSD stat (macOS) uses -f, GNU stat (Linux) uses -c
+      if [ "$(uname)" = "Darwin" ]; then
+        sock_gid=$(stat -f %g /var/run/docker.sock)
+      else
+        sock_gid=$(stat -c %g /var/run/docker.sock)
+      fi
       run_args+=(
         -v /var/run/docker.sock:/var/run/docker.sock
-        --group-add "$(stat -c %g /var/run/docker.sock)"
+        --group-add "$sock_gid"
       )
     fi
 
