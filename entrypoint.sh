@@ -15,9 +15,23 @@ if ! getent group "$gid" >/dev/null 2>&1; then
 fi
 # sudo validates the account via /etc/shadow; without an entry there it
 # reports "account validation failure, is your account locked?". A "*"
-# password means "no password login" but the account is not locked.
-if [ "$(getent shadow user 2>/dev/null | cut -d: -f1)" != "user" ]; then
-  echo 'user:*:19750:0:99999:7:::' >> /etc/shadow
+# password means "no password login" but the account is not locked. Key
+# this on the account that actually owns the runtime UID (usually the
+# "user" entry registered above, or the renamed base-image user when the
+# host UID is 1000), and fix a locked ("!") field too — the base image
+# may ship one.
+account=$(getent passwd "$uid" | cut -d: -f1)
+[ -n "$account" ] || account=user
+if [ "$(getent shadow "$account" 2>/dev/null | cut -d: -f2)" != "*" ]; then
+  # Rewrite via redirection, not sed -i: /etc itself isn't writable, so sed
+  # can't create its temp file — only the shadow file is (mode 666). Buffer
+  # the other entries first: the redirection truncates the file before grep
+  # could read it.
+  others=$(grep -v "^$account:" /etc/shadow 2>/dev/null)
+  {
+    [ -n "$others" ] && printf '%s\n' "$others"
+    printf '%s:*:19750:0:99999:7:::\n' "$account"
+  } > /etc/shadow
 fi
 
 # Seed $HOME from the host's ~/.config/pi-sbx/home-template (staged at

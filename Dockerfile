@@ -60,8 +60,18 @@ RUN arch="$(dpkg --print-architecture)" \
 RUN npm install -g --ignore-scripts @earendil-works/pi-coding-agent
 
 # Writable HOME for the arbitrary host UID the launcher passes with --user.
-# The real ~/.pi/agent is bind-mounted here at run time.
-RUN mkdir -p /home/sbx/.pi && chmod 777 /home/sbx
+# The real ~/.pi/agent is bind-mounted here at run time; .pi is writable so
+# the image also works standalone (without the launcher's mounts).
+RUN mkdir -p /home/sbx/.pi && chmod 777 /home/sbx /home/sbx/.pi
+
+# The base image ships a `node` user with uid/gid 1000. The launcher passes
+# an arbitrary host UID via --user; when that's exactly 1000 (common on
+# Linux hosts), the container would show the user as `node` with home
+# /home/node, and sudo would validate the account against node's shadow
+# entry. Rename user and group to `user` and point the home at /home/sbx
+# (nothing lives in /home/node) so the identity is consistent either way.
+RUN usermod -l user -d /home/sbx node \
+  && groupmod -n user node
 
 # The launcher passes an arbitrary host UID:GID via docker --user, which has
 # no /etc/passwd entry (bash shows "I have no name!"). The entrypoint adds a
