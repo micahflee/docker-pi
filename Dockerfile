@@ -84,18 +84,6 @@ RUN usermod -l user -d /home/sbx node \
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh \
   && chmod 666 /etc/passwd /etc/group /etc/shadow
-
-# Bundle the latest grilling/grill-me skills from mattpocock/skills.
-# They go in ~/.agents/skills (which pi auto-discovers) rather than
-# ~/.pi/agent/skills, because the launcher bind-mounts the host's
-# ~/.pi/agent over that path at run time.
-RUN git clone --depth 1 https://github.com/mattpocock/skills /tmp/skills \
-  && mkdir -p /home/sbx/.agents/skills \
-  && cp -r /tmp/skills/skills/productivity/grilling \
-          /tmp/skills/skills/productivity/grill-me \
-          /home/sbx/.agents/skills/ \
-  && chmod -R a+rX /home/sbx/.agents/skills \
-  && rm -rf /tmp/skills
 ENV HOME=/home/sbx
 
 # Also copy via OSC 52 so the host terminal's clipboard gets it.
