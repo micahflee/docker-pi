@@ -57,7 +57,12 @@ RUN arch="$(dpkg --print-architecture)" \
   && dpkg -i /tmp/glab.deb \
   && rm /tmp/glab.deb
 
-RUN npm install -g --ignore-scripts @earendil-works/pi-coding-agent
+RUN npm install -g --ignore-scripts @earendil-works/pi-coding-agent \
+  # `pi update` runs npm as the runtime user, which needs write access to
+  # the global node_modules (temp dir + atomic rename) and to /usr/local/bin
+  # (it swaps the pi bin symlinks). The sandbox hands out passwordless sudo
+  # anyway, so world-writable npm paths don't change the threat model.
+  && chmod -R a+rwX /usr/local/lib/node_modules /usr/local/bin
 
 # Writable HOME for the arbitrary host UID the launcher passes with --user.
 # The real ~/.pi/agent is bind-mounted here at run time; .pi is writable so
