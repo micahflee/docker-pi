@@ -20,12 +20,33 @@ if [ "$(getent shadow user 2>/dev/null | cut -d: -f1)" != "user" ]; then
   echo 'user:*:19750:0:99999:7:::' >> /etc/shadow
 fi
 
-# Snapshot the host gitconfig (staged at .gitconfig-host by the launcher)
-# into ~/.gitconfig. Only copy if absent: git can't write to a single-file
-# bind mount, and re-copying on restart would wipe container-local edits
-# (e.g. glab's credential helper).
-if [ -e "$HOME/.gitconfig-host" ] && [ ! -e "$HOME/.gitconfig" ]; then
-  cp "$HOME/.gitconfig-host" "$HOME/.gitconfig"
+# Seed $HOME from the host's ~/.config/pi-sbx/home-template (staged at
+# ~/.home-template by the launcher) — ssh keys, agent skills, etc. Copy
+# each path only if absent: the mount is read-only, and re-copying on
+# restart would wipe container-local edits. Existing directories are
+# merged, and mode bits are preserved (e.g. 700 ~/.ssh, 400 keys) so
+# things like ssh keep working; user-write is added where the host file
+# lacked it so tools in the container can still edit the copy.
+template="$HOME/.home-template"
+if [ -d "$template" ]; then
+  (
+    cd "$template" || exit 1
+    # sort ensures a directory is created before anything inside it
+    find . -mindepth 1 | sort | while IFS= read -r rel; do
+      dst="$HOME/$rel"
+      # skip anything that already exists (file OR directory), and
+      # skip the staging mount itself
+      if [ "$rel" = "./.home-template" ] || [ -e "$dst" ] || [ -L "$dst" ]; then
+        continue
+      fi
+      if [ -d "$rel" ]; then
+        mkdir -m "$(stat -c %a "$rel")" "$dst"
+      else
+        cp -Rp "$rel" "$dst"
+        [ -w "$rel" ] || chmod u+w "$dst"
+      fi
+    done
+  )
 fi
 
 # Repos are bind-mounted from the host and owned by the host UID, which

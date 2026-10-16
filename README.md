@@ -28,8 +28,26 @@ shares your settings, extensions, `/login` credentials, and sessions. If a
 Docker socket is present, it is mounted too, so `docker` commands run against
 your host daemon.
 
-Git config comes from the host's `~/.gitconfig` — or `~/.gitconfig-sbx`
-instead, if that file exists.
+## Homedir template
+
+Optionally, seed the sandbox's home directory by placing files in
+`~/.config/pi-sbx/home-template/` on the host — ssh keys, agent skills,
+dotfiles, and so on. Everything there is copied into the container's
+`$HOME` when it's first created. Each file is copied only if it doesn't
+already exist (existing directories like `~/.ssh` are merged), and file
+modes are preserved, so ssh key permissions carry over. For example:
+
+```
+~/.config/pi-sbx/home-template/
+  .gitconfig
+  .ssh/
+    config
+    id_ed25519
+  .agents/skills/...
+```
+
+Copies happen only at first start, so container-local edits stick around
+across restarts.
 
 Mounts and the image are fixed at container creation; to pick up Dockerfile
 or host config changes, remove the sandbox and let it be recreated.

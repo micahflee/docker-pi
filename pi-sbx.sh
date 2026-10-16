@@ -100,11 +100,6 @@ case "${1:-run}" in
 
     docker build -t pi-sandbox "$repo_dir"
 
-    gitconfig="$HOME/.gitconfig-sbx"
-    if [ ! -e "$gitconfig" ]; then
-      gitconfig="$HOME/.gitconfig"
-    fi
-
     run_args=(
       --name "$name"
       --label pi-sbx
@@ -114,12 +109,12 @@ case "${1:-run}" in
       -w "$cwd"
       -v "$agent_dir:/home/sbx/.pi/agent"
     )
-    if [ -e "$gitconfig" ]; then
-      # Mount to a staging path, not ~/.gitconfig itself: git writes config
-      # files atomically (temp file + rename), which fails with EBUSY on a
-      # single-file bind mount. The entrypoint copies it into ~/.gitconfig
-      # at startup; writes stay container-local.
-      run_args+=(-v "$gitconfig:/home/sbx/.gitconfig-host:ro")
+    home_template="$HOME/.config/pi-sbx/home-template"
+    if [ -d "$home_template" ]; then
+      # Everything in ~/.config/pi-sbx/home-template (ssh keys, agent
+      # skills, dotfiles, ...) is staged read-only at ~/.home-template;
+      # the entrypoint copies it into $HOME at startup.
+      run_args+=(-v "$home_template:/home/sbx/.home-template:ro")
     fi
 
     if [ -e /var/run/docker.sock ]; then
